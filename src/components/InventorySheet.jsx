@@ -609,7 +609,7 @@ const InventorySheet = ({
                           }
                         />
                       </td>
-                      <td className="border-b border-gray-400 p-0 no-print text-center align-middle bg-white group-hover:bg-blue-50">
+                      <td className="border-b border-gray-400 p-0 no-print text-center align-middle bg-white ">
                         <button
                           onClick={(e) => {
                             e.stopPropagation(); // Quan trọng: Ngăn sự kiện nổi bọt
@@ -617,7 +617,7 @@ const InventorySheet = ({
                           }}
                           // Tăng vùng bấm: p-3 trên mobile, p-1 trên PC
                           // Thêm touch-manipulation để trình duyệt phản hồi nhanh hơn
-                          className="inline-flex items-center justify-center p-3 md:p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded touch-manipulation cursor-pointer"
+                          className="inline-flex items-center justify-center p-3 md:p-1 text-red-400  rounded touch-manipulation cursor-pointer"
                         >
                           {/* Tăng kích thước icon lên 1 chút nếu cần */}
                           <Trash2
