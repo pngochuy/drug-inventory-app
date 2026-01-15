@@ -97,6 +97,12 @@ const InventorySheet = ({
       },
     };
 
+    // 1. Kiểm tra xem thiết bị có phải là Mobile không
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+
     // QUAN TRỌNG: Thay đổi cách xuất file
     // Thay vì .save() ngay, chúng ta xuất ra dạng BLOB để xử lý
     html2pdf()
@@ -104,27 +110,28 @@ const InventorySheet = ({
       .from(element)
       .output("blob") // Xuất ra dữ liệu Blob
       .then(async (blob) => {
-        // Tạo một đối tượng File từ Blob để chia sẻ
-        const file = new File([blob], fileName, { type: "application/pdf" });
-
-        // KIỂM TRA: Nếu là Mobile và trình duyệt hỗ trợ chia sẻ file (Share Sheet)
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: "Biên bản kiểm kê",
-              text: "Gửi biên bản kiểm kê thuốc.",
-            });
-            // Chia sẻ thành công thì dừng, không cần tải xuống kiểu cũ
-            return;
-          } catch (error) {
-            console.log("Người dùng đã hủy chia sẻ hoặc lỗi:", error);
-            // Nếu lỗi (hoặc user hủy), vẫn để code chạy tiếp xuống dưới để fallback tải thường
+        // TRƯỜNG HỢP 1: LÀ ĐIỆN THOẠI (Mobile) -> Dùng Web Share API
+        if (isMobile && navigator.canShare) {
+          // Tạo một đối tượng File từ Blob để chia sẻ
+          const file = new File([blob], fileName, { type: "application/pdf" });
+          // KIỂM TRA: Nếu là Mobile và trình duyệt hỗ trợ chia sẻ file (Share Sheet)
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+              await navigator.share({
+                files: [file],
+                title: "Biên bản kiểm kê",
+                text: "Gửi biên bản kiểm kê thuốc.",
+              });
+              // Chia sẻ thành công thì dừng, không cần tải xuống kiểu cũ
+              return;
+            } catch (error) {
+              console.log("Người dùng đã hủy chia sẻ hoặc lỗi:", error);
+              // Nếu lỗi (hoặc user hủy), vẫn để code chạy tiếp xuống dưới để fallback tải thường
+            }
           }
         }
 
-        // FALLBACK: Cách tải truyền thống cho PC hoặc trình duyệt cũ
-        // (Đây là logic cũ của .save() nhưng viết tường minh)
+        // TRƯỜNG HỢP 2: LÀ MÁY TÍNH (PC) hoặc Mobile không hỗ trợ Share -> Tải xuống trực tiếp
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
@@ -132,11 +139,12 @@ const InventorySheet = ({
         document.body.appendChild(link);
         link.click();
 
-        // Dọn dẹp bộ nhớ
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-
         setIsGenerating(false); // Xong việc thì tắt loading
+        // Dọn dẹp bộ nhớ
+        setTimeout(() => {
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }, 100);
       })
       .catch(() => setIsGenerating(false)); // Lỗi cũng tắt loading;
   };

@@ -28,7 +28,7 @@ const DrugManager = ({ onBack }) => {
       const data = await res.json();
       setDrugs(data);
     } catch (err) {
-      alert("Lỗi kết nối Server! Hãy chắc chắn bạn đã chạy 'node server.js'");
+      alert("Lỗi kết nối Server!");
     } finally {
       setLoading(false);
     }
@@ -79,26 +79,29 @@ const DrugManager = ({ onBack }) => {
   );
 
   return (
-    <div className="p-4 max-w-6xl mx-auto animate-fade-in h-full flex flex-col">
-      <div className="flex items-center gap-3 mb-4 shrink-0">
+    // THAY ĐỔI 1: Dùng h-[100dvh] để fix cứng chiều cao bằng màn hình điện thoại
+    <div className="p-2 md:p-4 max-w-6xl mx-auto animate-fade-in h-[100dvh] flex flex-col overflow-hidden">
+      {/* Header - Giữ nguyên kích thước */}
+      <div className="flex items-center gap-3 mb-2 shrink-0">
         <button
           onClick={onBack}
           className="p-2 hover:bg-gray-200 rounded-full md:hidden"
         >
           <ChevronLeft />
         </button>
-        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+        <h2 className="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
           <Database className="text-blue-600" /> Quản Lý Thuốc
         </h2>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6 flex-1 overflow-hidden">
-        {/* Form */}
-        <div className="md:col-span-1 bg-white p-5 rounded-xl shadow border h-fit">
-          <h3 className="font-semibold text-lg mb-4 text-slate-700">
+      {/* Container chính: Trên Mobile là Flex Column, trên Desktop là Grid */}
+      <div className="flex flex-col md:grid md:grid-cols-3 gap-4 flex-1 overflow-hidden min-h-0">
+        {/* Form: Trên mobile sẽ nằm trên, kích thước tự nhiên */}
+        <div className="md:col-span-1 bg-white p-3 md:p-5 rounded-xl shadow border h-fit shrink-0 overflow-y-auto max-h-[40vh] md:max-h-none">
+          <h3 className="font-semibold text-lg mb-2 text-slate-700">
             {editingId ? "Cập nhật" : "Thêm thuốc mới"}
           </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div>
               <label className="text-sm font-medium text-slate-600">
                 Tên thuốc
@@ -145,7 +148,7 @@ const DrugManager = ({ onBack }) => {
                 type="submit"
                 className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 flex justify-center gap-2 items-center font-medium"
               >
-                <Save size={18} /> {editingId ? "Cập nhật" : "Thêm mới"}
+                <Save size={18} /> {editingId ? "Lưu" : "Thêm"}
               </button>
               {editingId && (
                 <button
@@ -163,38 +166,37 @@ const DrugManager = ({ onBack }) => {
           </form>
         </div>
 
-        {/* List */}
-        <div className="md:col-span-2 bg-white rounded-xl shadow border flex flex-col overflow-hidden">
-          <div className="p-4 border-b bg-slate-50 flex items-center gap-2 shrink-0">
+        {/* List: THAY ĐỔI QUAN TRỌNG - flex-1 để chiếm hết phần còn lại */}
+        <div className="md:col-span-2 bg-white rounded-xl shadow border flex flex-col flex-1 min-h-0 overflow-hidden">
+          <div className="p-3 border-b bg-slate-50 flex items-center gap-2 shrink-0">
             <Search className="text-slate-400" size={20} />
             <input
               className="bg-transparent outline-none w-full"
-              placeholder="Tìm kiếm thuốc..."
+              placeholder="Tìm kiếm..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <button
               onClick={fetchDrugs}
               className="p-2 hover:bg-gray-200 rounded-full"
-              title="Tải lại"
             >
               <RefreshCw size={18} />
             </button>
           </div>
 
-          <div className="overflow-y-auto flex-1 p-0 relative">
+          <div className="overflow-y-auto flex-1 p-0 relative custom-scrollbar">
             {loading && (
               <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
                 Đang tải...
               </div>
             )}
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-100 sticky top-0">
+              <thead className="bg-slate-100 sticky top-0 z-10 shadow-sm">
                 <tr>
                   <th className="p-3">Tên thuốc</th>
-                  <th className="p-3 w-20">ĐVT</th>
-                  <th className="p-3 w-20 text-right">Tồn</th>
-                  <th className="p-3 w-24 text-center">Xử lý</th>
+                  <th className="p-3 w-16">ĐVT</th>
+                  <th className="p-3 w-16 text-right">Tồn</th>
+                  <th className="p-3 w-20 text-center"></th>
                 </tr>
               </thead>
               <tbody className="divide-y">
