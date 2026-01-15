@@ -68,13 +68,19 @@ const InventorySheet = ({
       ? `${dateParts.year}-${dateParts.month}-${dateParts.day}`
       : "Chua-nhap-ngay";
 
+  const [isGenerating, setIsGenerating] = useState(false);
   // --- Print & PDF Handlers ---
   const handleDownloadPDF = () => {
+    setIsGenerating(true); // Bắt đầu loading
     const element = printRef.current;
+
+    // Tên file
+    const fileName = `Biên-bản-kiểm-kê-thuốc-tủ-trực-${fullDateString}.pdf`;
+
     const opt = {
       margin: [10, 10, 10, 10],
-      filename: `Bien-ban-kiem-ke-${fullDateString}.pdf`,
-      image: { type: "jpeg", quality: 1.0 },
+      filename: fileName,
+      image: { type: "jpeg", quality: 0.98 }, // Giảm quality xíu cho nhẹ
       html2canvas: {
         scale: 2,
         useCORS: true,
@@ -87,11 +93,52 @@ const InventorySheet = ({
         unit: "mm",
         format: "a4",
         orientation: "portrait",
-        compress: false,
+        compress: true, // Bật nén để file nhẹ hơn trên mobile
       },
     };
 
-    html2pdf().set(opt).from(element).save();
+    // QUAN TRỌNG: Thay đổi cách xuất file
+    // Thay vì .save() ngay, chúng ta xuất ra dạng BLOB để xử lý
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .output("blob") // Xuất ra dữ liệu Blob
+      .then(async (blob) => {
+        // Tạo một đối tượng File từ Blob để chia sẻ
+        const file = new File([blob], fileName, { type: "application/pdf" });
+
+        // KIỂM TRA: Nếu là Mobile và trình duyệt hỗ trợ chia sẻ file (Share Sheet)
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: "Biên bản kiểm kê",
+              text: "Gửi biên bản kiểm kê thuốc.",
+            });
+            // Chia sẻ thành công thì dừng, không cần tải xuống kiểu cũ
+            return;
+          } catch (error) {
+            console.log("Người dùng đã hủy chia sẻ hoặc lỗi:", error);
+            // Nếu lỗi (hoặc user hủy), vẫn để code chạy tiếp xuống dưới để fallback tải thường
+          }
+        }
+
+        // FALLBACK: Cách tải truyền thống cho PC hoặc trình duyệt cũ
+        // (Đây là logic cũ của .save() nhưng viết tường minh)
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+
+        // Dọn dẹp bộ nhớ
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        setIsGenerating(false); // Xong việc thì tắt loading
+      })
+      .catch(() => setIsGenerating(false)); // Lỗi cũng tắt loading;
   };
 
   const handlePrint = useReactToPrint({
@@ -230,9 +277,15 @@ const InventorySheet = ({
           </button>
           <button
             onClick={handleDownloadPDF}
-            className="whitespace-nowrap bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2 font-medium shadow-sm text-sm ml-auto md:ml-0"
+            disabled={isGenerating} // Khóa nút khi đang tạo
+            className={`whitespace-nowrap px-4 py-2 rounded flex items-center gap-2 font-medium shadow-sm text-sm ml-auto md:ml-0 ${
+              isGenerating
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            } text-white`}
           >
-            <Printer size={18} /> In Biên Bản
+            <Printer size={18} />{" "}
+            {isGenerating ? "Đang tạo PDF..." : "In Biên Bản"}
           </button>
         </div>
       </div>
