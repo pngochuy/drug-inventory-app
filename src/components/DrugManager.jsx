@@ -208,7 +208,7 @@ const DrugManager = ({ onBack }) => {
                     <td className="p-3 flex justify-center gap-2">
                       <button
                         onClick={() => handleEdit(item)}
-                        className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                        className="p-1 text-blue-600 rounded"
                       >
                         <Edit size={16} />
                       </button>
@@ -218,7 +218,7 @@ const DrugManager = ({ onBack }) => {
                           e.stopPropagation(); // Ngăn sự kiện lan ra tr (tránh lỗi double tap mobile)
                           handleDelete(item.id);
                         }}
-                        className="p-1 text-red-600 hover:bg-red-100 rounded"
+                        className="p-1 text-red-600 rounded"
                       >
                         <Trash2 size={16} />
                       </button>
