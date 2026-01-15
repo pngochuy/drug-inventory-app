@@ -64,7 +64,7 @@ const DrugManager = ({ onBack }) => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Xóa thuốc này khỏi Database?")) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa thuốc này?")) {
       try {
         await fetch(`${API_URL}/${id}`, { method: "DELETE" });
         fetchDrugs();
@@ -213,7 +213,11 @@ const DrugManager = ({ onBack }) => {
                         <Edit size={16} />
                       </button>
                       <button
-                        onClick={() => handleDelete(item.id)}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Ngăn sự kiện lan ra tr (tránh lỗi double tap mobile)
+                          handleDelete(item.id);
+                        }}
                         className="p-1 text-red-600 hover:bg-red-100 rounded"
                       >
                         <Trash2 size={16} />
