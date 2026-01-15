@@ -78,20 +78,41 @@ const DrugManager = ({ onBack }) => {
     item.TenDP?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // --- TÍNH TOÁN THỐNG KÊ ---
+  // 1. Tổng số đầu thuốc (loại thuốc)
+  const totalDrugTypes = drugs.length;
+
+  // 2. Tổng số lượng tồn kho (cộng dồn TonHT của tất cả thuốc)
+  const totalStock = drugs.reduce(
+    (sum, item) => sum + (Number(item.TonHT) || 0),
+    0
+  );
+
   return (
     // THAY ĐỔI 1: Dùng h-[100dvh] để fix cứng chiều cao bằng màn hình điện thoại
     <div className="p-2 md:p-4 max-w-6xl mx-auto animate-fade-in h-[100dvh] flex flex-col overflow-hidden">
       {/* Header - Giữ nguyên kích thước */}
-      <div className="flex items-center gap-3 mb-2 shrink-0">
+      <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          className="p-2 hover:bg-gray-200 rounded-full md:hidden"
+          className="p-2 hover:bg-slate-100 rounded-full transition-colors"
         >
-          <ChevronLeft />
+          <ChevronLeft size={24} className="text-slate-600" />
         </button>
-        <h2 className="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
-          <Database className="text-blue-600" /> Quản Lý Thuốc
-        </h2>
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">
+            Quản lý danh mục thuốc
+          </h2>
+          {/* PHẦN THÊM MỚI: Hiển thị thống kê */}
+          <div className="flex gap-3 mt-1 text-sm">
+            <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md font-medium">
+              Số đầu thuốc: {loading ? "..." : totalDrugTypes}
+            </span>
+            <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-md font-medium">
+              Tổng tồn kho: {loading ? "..." : totalStock.toLocaleString()}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Container chính: Trên Mobile là Flex Column, trên Desktop là Grid */}

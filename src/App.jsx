@@ -98,10 +98,10 @@ function App() {
             <Plus className="rotate-45" size={28} />
           </div>
           <h1 className="font-bold text-xl text-slate-800">Hospital Pharma</h1>
-          <div className="flex items-center gap-1 text-xs text-green-600 font-medium mt-1">
+          {/* <div className="flex items-center gap-1 text-xs text-green-600 font-medium mt-1">
             <div className={`w-2 h-2 rounded-full bg-green-500`}></div>
-            Connected: Server :5000
-          </div>
+            Connected: Server
+          </div> */}
         </div>
 
         <nav className="p-4 space-y-2">
