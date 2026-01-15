@@ -611,10 +611,19 @@ const InventorySheet = ({
                       </td>
                       <td className="border-b border-gray-400 p-0 no-print text-center align-middle bg-white group-hover:bg-blue-50">
                         <button
-                          onClick={() => removeRow(item.id)}
-                          className="inline-flex items-center justify-center p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Quan trọng: Ngăn sự kiện nổi bọt
+                            removeRow(item.id);
+                          }}
+                          // Tăng vùng bấm: p-3 trên mobile, p-1 trên PC
+                          // Thêm touch-manipulation để trình duyệt phản hồi nhanh hơn
+                          className="inline-flex items-center justify-center p-3 md:p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded touch-manipulation cursor-pointer"
                         >
-                          <Trash2 size={14} />
+                          {/* Tăng kích thước icon lên 1 chút nếu cần */}
+                          <Trash2
+                            size={18}
+                            className="md:w-[14px] md:h-[14px]"
+                          />
                         </button>
                       </td>
                     </tr>
